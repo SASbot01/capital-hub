@@ -1,4 +1,4 @@
-package com.capitalhub.backend.auth.dto;
+package com.capitalhub.auth.dto;
 
 import lombok.Builder;
 import lombok.Data;

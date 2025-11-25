@@ -22,14 +22,9 @@ public class JobOfferService {
     private final JobOfferRepository jobOfferRepository;
     private final CompanyRepository companyRepository;
 
-    /**
-     * Crear una oferta (solo empresa logueada).
-     * Recibe el userId de la empresa (del JWT).
-     */
     public JobOfferResponse createOffer(Long companyUserId, JobOfferRequest req) {
-
         Company company = companyRepository.findByUserId(companyUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada para este usuario"));
+                .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
 
         JobOffer offer = JobOffer.builder()
                 .company(company)
@@ -37,7 +32,8 @@ public class JobOfferService {
                 .description(req.getDescription())
                 .role(req.getRole())
                 .seats(req.getSeats())
-                .maxApplicants(req.getSeats() * 20)  // regla MVP seats×20
+                .maxApplicants(req.getSeats() * 20) // Regla de negocio MVP
+                .applicantsCount(0)
                 .language(req.getLanguage())
                 .crm(req.getCrm())
                 .commissionPercent(req.getCommissionPercent())
@@ -50,57 +46,12 @@ public class JobOfferService {
                 .whatsappUrl(req.getWhatsappUrl())
                 .status(JobStatus.ACTIVE)
                 .active(true)
-                .applicantsCount(0)
                 .build();
 
-        JobOffer saved = jobOfferRepository.save(offer);
-        return mapToResponse(saved);
+        return mapToResponse(jobOfferRepository.save(offer));
     }
 
-    /**
-     * Listado de ofertas activas para REP filtrando por rol.
-     * - Setter -> SETTER + BOTH
-     * - Closer -> CLOSER + BOTH
-     * - Cold caller -> COLD_CALLER + BOTH
-     * - BOTH -> todas las anteriores
-     */
-    public List<JobOfferResponse> listOffersForRep(RepRole repRole) {
-
-        List<RepRole> allowedRoles = new ArrayList<>();
-
-        switch (repRole) {
-            case SETTER -> {
-                allowedRoles.add(RepRole.SETTER);
-                allowedRoles.add(RepRole.BOTH);
-            }
-            case CLOSER -> {
-                allowedRoles.add(RepRole.CLOSER);
-                allowedRoles.add(RepRole.BOTH);
-            }
-            case COLD_CALLER -> {
-                allowedRoles.add(RepRole.COLD_CALLER);
-                allowedRoles.add(RepRole.BOTH);
-            }
-            case BOTH -> {
-                allowedRoles.add(RepRole.SETTER);
-                allowedRoles.add(RepRole.CLOSER);
-                allowedRoles.add(RepRole.COLD_CALLER);
-                allowedRoles.add(RepRole.BOTH);
-            }
-        }
-
-        return jobOfferRepository.findByActiveTrueAndRoleIn(allowedRoles)
-                .stream()
-                .filter(o -> o.getStatus() == JobStatus.ACTIVE)
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    /**
-     * Listado de ofertas de una empresa (dashboard empresa).
-     */
     public List<JobOfferResponse> listCompanyOffers(Long companyUserId) {
-
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
 
@@ -110,20 +61,40 @@ public class JobOfferService {
                 .toList();
     }
 
-    /**
-     * Obtener una oferta por id (para detalle).
-     */
+    public List<JobOfferResponse> listOffersForRep(RepRole repRole) {
+        List<RepRole> allowedRoles = new ArrayList<>();
+        // Un Setter ve ofertas de SETTER y de BOTH
+        if (repRole == RepRole.SETTER) {
+            allowedRoles.add(RepRole.SETTER);
+            allowedRoles.add(RepRole.BOTH);
+        } else if (repRole == RepRole.CLOSER) {
+            allowedRoles.add(RepRole.CLOSER);
+            allowedRoles.add(RepRole.BOTH);
+        } else if (repRole == RepRole.COLD_CALLER) {
+            allowedRoles.add(RepRole.COLD_CALLER);
+            allowedRoles.add(RepRole.BOTH);
+        } else {
+            // BOTH o cualquier otro ve todo (simplificado)
+            allowedRoles.add(RepRole.SETTER);
+            allowedRoles.add(RepRole.CLOSER);
+            allowedRoles.add(RepRole.COLD_CALLER);
+            allowedRoles.add(RepRole.BOTH);
+        }
+
+        return jobOfferRepository.findByActiveTrueAndRoleIn(allowedRoles)
+                .stream()
+                .filter(o -> o.getStatus() == JobStatus.ACTIVE)
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public JobOfferResponse getOffer(Long id) {
         JobOffer offer = jobOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
         return mapToResponse(offer);
     }
 
-    /**
-     * Pausar o cerrar oferta (empresa).
-     */
     public JobOfferResponse updateStatus(Long companyUserId, Long offerId, JobStatus status) {
-
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
 
@@ -131,21 +102,19 @@ public class JobOfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
 
         if (!offer.getCompany().getId().equals(company.getId())) {
-            throw new IllegalArgumentException("No puedes modificar una oferta que no es tuya");
+            throw new IllegalArgumentException("No puedes editar una oferta que no es tuya");
         }
 
         offer.setStatus(status);
         if (status == JobStatus.CLOSED) {
             offer.setActive(false);
+        } else {
+            offer.setActive(true);
         }
 
-        JobOffer saved = jobOfferRepository.save(offer);
-        return mapToResponse(saved);
+        return mapToResponse(jobOfferRepository.save(offer));
     }
 
-    // -----------------------
-    // Mapper sencillo MVP
-    // -----------------------
     private JobOfferResponse mapToResponse(JobOffer o) {
         return JobOfferResponse.builder()
                 .id(o.getId())
@@ -174,4 +143,3 @@ public class JobOfferService {
                 .build();
     }
 }
-

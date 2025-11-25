@@ -1,7 +1,7 @@
 package com.capitalhub.applications.service;
 
-import com.capitalhub.applications.dto.ApplyRequest;
 import com.capitalhub.applications.dto.ApplicationResponse;
+import com.capitalhub.applications.dto.ApplyRequest;
 import com.capitalhub.applications.entity.ApplicationStatus;
 import com.capitalhub.applications.entity.JobApplication;
 import com.capitalhub.applications.repository.JobApplicationRepository;
@@ -29,11 +29,6 @@ public class JobApplicationService {
 
     /**
      * REP aplica a una oferta.
-     * - valida que exista
-     * - valida que esté activa
-     * - valida que no haya aplicado antes
-     * - valida límite maxApplicants (seats×20)
-     * - incrementa applicantsCount
      */
     public ApplicationResponse applyToOffer(Long repUserId, Long offerId, ApplyRequest req) {
 
@@ -43,6 +38,7 @@ public class JobApplicationService {
         JobOffer offer = jobOfferRepository.findById(offerId)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
 
+        // Validaciones
         if (!Boolean.TRUE.equals(offer.getActive()) || offer.getStatus() != JobStatus.ACTIVE) {
             throw new IllegalArgumentException("Esta oferta no está activa");
         }
@@ -55,6 +51,7 @@ public class JobApplicationService {
             throw new IllegalArgumentException("La oferta ya alcanzó el máximo de postulaciones");
         }
 
+        // Crear aplicación
         JobApplication application = JobApplication.builder()
                 .rep(rep)
                 .jobOffer(offer)
@@ -64,7 +61,7 @@ public class JobApplicationService {
 
         JobApplication saved = applicationRepository.save(application);
 
-        // incrementamos contador en oferta
+        // Actualizar contador en oferta
         offer.setApplicantsCount(offer.getApplicantsCount() + 1);
         jobOfferRepository.save(offer);
 
@@ -88,7 +85,6 @@ public class JobApplicationService {
      * Empresa ve aplicaciones de una oferta suya.
      */
     public List<ApplicationResponse> listApplicationsForOffer(Long companyUserId, Long offerId) {
-
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
 
@@ -106,7 +102,7 @@ public class JobApplicationService {
     }
 
     /**
-     * Empresa cambia estado de aplicación.
+     * Empresa cambia estado de aplicación (ENTREVISTA, CONTRATADO, RECHAZADO...).
      */
     public ApplicationResponse updateApplicationStatus(
             Long companyUserId,
@@ -115,7 +111,6 @@ public class JobApplicationService {
             String companyNotes,
             String interviewUrl
     ) {
-
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
 
@@ -126,6 +121,7 @@ public class JobApplicationService {
             throw new IllegalArgumentException("No puedes modificar aplicaciones de otra empresa");
         }
 
+        // Lógica de cambio de estado
         switch (status) {
             case INTERVIEW -> app.markInterview(interviewUrl);
             case OFFER_SENT -> app.markOfferSent();
@@ -143,9 +139,7 @@ public class JobApplicationService {
         return mapToResponse(saved);
     }
 
-    // -----------------------
-    // Mapper sencillo MVP
-    // -----------------------
+    // Mapper manual (Entity -> DTO)
     private ApplicationResponse mapToResponse(JobApplication a) {
         JobOffer o = a.getJobOffer();
         RepProfile r = a.getRep();
