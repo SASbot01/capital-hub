@@ -2,7 +2,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 // ❌ Eliminamos la importación directa de la API.
 // 🟢 Importamos el hook de autenticación
 import { useAuth } from "../../context/AuthContext";

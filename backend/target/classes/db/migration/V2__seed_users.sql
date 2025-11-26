@@ -2,37 +2,28 @@
 -- CAPITALHUB — V2: Seed inicial de usuarios (ADMIN + COMPANY)
 -- =========================================================
 
--- ==========================================
--- CONTRASEÑAS EN BCRYPT (para desarrollo)
--- password: admin123
--- password: company123
--- ==========================================
-
--- Hashes generados con BCrypt (Spring):
--- admin123   => $2a$10$QmInRn7QG8Jm2f0eiOAFxeTtCa56zUoaZMhUlCT3VkOITkkpFmS4y
--- company123 => $2a$10$wML/sOqu9Tsb3ZuRV24n4uW9rLoD4Uapjpp5t8p39ewfMcqnanRWq
+-- 1. INSERTAR ROLES (Faltaba esto)
+INSERT IGNORE INTO roles (name) VALUES ('ADMIN'), ('COMPANY'), ('SETTER'), ('CLOSER');
 
 -- ============================
--- 1. USUARIO ADMIN
+-- 2. USUARIO ADMIN
 -- ============================
-
 INSERT INTO users (email, password, first_name, last_name, role_id)
 VALUES (
     'admin@capitalhub.com',
-    '$2a$10$QmInRn7QG8Jm2f0eiOAFxeTtCa56zUoaZMhUlCT3VkOITkkpFmS4y',
+    '$2a$10$QmInRn7QG8Jm2f0eiOAFxeTtCa56zUoaZMhUlCT3VkOITkkpFmS4y', -- admin123
     'Super',
     'Admin',
     (SELECT id FROM roles WHERE name = 'ADMIN')
 );
 
 -- ============================
--- 2. USUARIO COMPANY + PERFIL COMPANY
+-- 3. USUARIO COMPANY + PERFIL
 -- ============================
-
 INSERT INTO users (email, password, first_name, last_name, role_id)
 VALUES (
     'demo@company.com',
-    '$2a$10$wML/sOqu9Tsb3ZuRV24n4uW9rLoD4Uapjpp5t8p39ewfMcqnanRWq',
+    '$2a$10$wML/sOqu9Tsb3ZuRV24n4uW9rLoD4Uapjpp5t8p39ewfMcqnanRWq', -- company123
     'Demo',
     'Company',
     (SELECT id FROM roles WHERE name = 'COMPANY')

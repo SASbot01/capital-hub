@@ -1,32 +1,28 @@
-# Etapa 1: Compilación (Build Stage)
+# Etapa 1: Build
 FROM node:20-alpine as builder
-
-# Crea el directorio de trabajo
 WORKDIR /app
-
-# Copia los archivos de configuración de Node
 COPY package.json package-lock.json ./
-
-# Instala las dependencias
 RUN npm install
-
-# Copia el código fuente
 COPY . .
-
-# Compila la aplicación React (usando Vite o tu herramienta de build)
 RUN npm run build
 
-# Etapa 2: Ejecución (Production Stage - Usando Nginx para servir estáticos)
+# Etapa 2: Nginx
 FROM nginx:alpine
 
-# Copia la configuración de Nginx (asume que tienes un archivo nginx.conf, opcionalmente)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Borrar configuración por defecto
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copia los archivos compilados del Frontend al directorio de servicio de Nginx
+# Crear configuración para SPA (Redirigir todo a index.html)
+RUN echo 'server { \
+    listen 80; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expone el puerto de Nginx (80)
 EXPOSE 80
-
-# Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]

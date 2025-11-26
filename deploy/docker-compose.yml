@@ -1,15 +1,12 @@
 version: '3.8'
 
 services:
-  # -------------------------------------
-  # 1. SERVICIO DE BASE DE DATOS: MYSQL
-  # -------------------------------------
+  # 1. DATABASE
   capitalhub-mysql:
     image: mysql:8.0
     container_name: capitalhub-mysql
     restart: always
     environment:
-      # Credenciales de tu application.yml
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: capitalhub
       MYSQL_USER: root
@@ -19,9 +16,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  # -------------------------------------
-  # 2. SERVICIO DE ALMACENAMIENTO: MINIO
-  # -------------------------------------
+  # 2. MINIO
   capitalhub-minio:
     image: minio/minio
     container_name: capitalhub-minio
@@ -36,14 +31,11 @@ services:
     volumes:
       - minio_data:/data
 
-  # -------------------------------------
-  # 3. SERVICIO DE BACKEND: SPRING BOOT
-  # -------------------------------------
+  # 3. BACKEND
   capitalhub-backend:
     build:
-      # 🚨 CAMBIO CRÍTICO: El contexto ahora es la carpeta backend
-      context: ../backend 
-      dockerfile: Dockerfile
+      context: ../backend
+      dockerfile: ../deploy/Dockerfile.backend
     container_name: capitalhub-backend
     restart: always
     ports:
@@ -52,30 +44,26 @@ services:
       - capitalhub-mysql
       - capitalhub-minio
     environment:
-      # Sobreescritura de localhost por el nombre del servicio Docker
       SPRING_DATASOURCE_URL: jdbc:mysql://capitalhub-mysql:3306/capitalhub?useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: admin
       MINIO_URL: http://capitalhub-minio:9000
-      
-  # -------------------------------------
-  # 4. SERVICIO DE FRONTEND: REACT/VITE (Si lo quieres en Docker)
-  # -------------------------------------
-  # Asegúrate de crear frontend/Dockerfile.frontend
-  # capitalhub-frontend:
-  #   build:
-  #     context: ../frontend
-  #     dockerfile: Dockerfile.frontend
-  #   container_name: capitalhub-frontend
-  #   restart: always
-  #   ports:
-  #     - "5173:5173"
-  #   depends_on:
-  #     - capitalhub-backend
-  #   environment:
-  #     VITE_API_BASE_URL: http://capitalhub-backend:8081/api 
 
-# Volumen para persistir los datos de la base de datos y Minio
+  # 4. FRONTEND
+  capitalhub-frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../deploy/Dockerfile.frontend
+    container_name: capitalhub-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - capitalhub-backend
+    # Nota: Vite compila las vars de entorno en tiempo de BUILD (en el Dockerfile),
+    # pero como fallback usará localhost si no se define.
+    # Para Docker, el navegador del cliente es quien hace la petición, así que localhost es correcto.
+
 volumes:
   mysql_data:
   minio_data:

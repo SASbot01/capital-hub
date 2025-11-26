@@ -128,8 +128,8 @@ public class JobApplicationService {
                 .repMessage(app.getRepMessage())
                 .companyNotes(app.getCompanyNotes())
                 .interviewUrl(app.getInterviewUrl())
-                // CORRECCIÓN AQUÍ: Null check para createdAt
-                .applicationDate(app.getCreatedAt() != null ? app.getCreatedAt().toString() : "")
+                // CORRECCIÓN AQUÍ: Usamos el nombre correcto del builder para la fecha de creación
+                .createdAt(app.getCreatedAt())
                 .build();
     }
 }

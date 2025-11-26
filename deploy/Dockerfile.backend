@@ -1,19 +1,30 @@
-# Etapa de compilación (usamos una imagen base completa para compilar)
-FROM eclipse-temurin:21-jdk-jammy as builder
+# Etapa 1: Compilación (Usamos una imagen oficial de Maven para no depender de archivos locales)
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# Define el archivo JAR que se genera en la etapa de Maven
-ARG JAR_FILE=target/*.jar
+WORKDIR /app
 
-# Copia el JAR del proyecto al contenedor de compilación
-COPY ${JAR_FILE} app.jar
+# 1. Copiamos SOLO el pom.xml primero para descargar dependencias (aprovechar caché)
+COPY pom.xml .
 
-# Etapa de ejecución (usamos una imagen JRE más ligera para producción)
+# 2. Descargamos las dependencias. Si no cambias el pom.xml, docker no repetirá este paso.
+RUN mvn dependency:go-offline
+
+# 3. Copiamos el código fuente
+COPY src ./src
+
+# 4. Compilamos el proyecto creando el JAR (saltando tests para ir rápido)
+RUN mvn clean package -DskipTests
+
+# -------------------------------------------------------------------
+# Etapa 2: Ejecución (Imagen ligera solo con Java)
+# -------------------------------------------------------------------
 FROM eclipse-temurin:21-jre-jammy
-# Expone el puerto del servidor (8081)
+
+WORKDIR /app
+
+# Copiamos el JAR generado en la etapa anterior
+COPY --from=builder /app/target/*.jar app.jar
+
 EXPOSE 8081
 
-# Copia el JAR compilado desde la etapa 'builder'
-COPY --from=builder app.jar app.jar
-
-# Punto de entrada para ejecutar la aplicación JAR
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

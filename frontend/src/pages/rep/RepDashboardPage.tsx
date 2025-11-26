@@ -35,7 +35,7 @@ const ACTIVIDAD: { label: string; value: string; hint: string }[] = [
 ];
 
 export default function RepDashboardPage() {
-    const { user } = useAuth();
+    useAuth();
     
     // 🟢 1. Conexión al Backend
     const { data, isLoading, error, refetch } = useFetch<DashboardData>(
@@ -139,7 +139,7 @@ export default function RepDashboardPage() {
                                     </div>
                                     {/* Normalizamos el estado para la UI */}
                                     <span className="text-[11px] px-3 py-1 rounded-full bg-black text-white">
-                                        {p.status.replace('_', ' ')}
+                                        {p.status.replaceAll('_', ' ')}
                                     </span>
                                 </div>
                             ))}
