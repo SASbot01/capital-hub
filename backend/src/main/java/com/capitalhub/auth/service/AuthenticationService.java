@@ -23,16 +23,12 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final RepProfileRepository repProfileRepository; // ✅ Necesario para crear el perfil
+    private final RepProfileRepository repProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    /**
-     * Login de usuario (REP / COMPANY / ADMIN)
-     */
     public LoginResponse login(LoginRequest request) {
         try {
-            // Autenticar con Spring Security
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
@@ -43,11 +39,10 @@ public class AuthenticationService {
             throw new BadCredentialsException("Credenciales incorrectas");
         }
 
-        // Si ha pasado la autenticación, cargamos el usuario
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
 
-        // ✅ Corregido: Role es un Enum, usamos .name()
+        // ✅ CORREGIDO: .name() en lugar de .getName()
         String roleName = user.getRole().name();
         String token = jwtService.generateToken(user.getEmail(), roleName);
 
@@ -59,27 +54,21 @@ public class AuthenticationService {
                 .build();
     }
 
-    /**
-     * Registro SOLO de REP (comercial) en el MVP
-     */
     public LoginResponse signupRep(SignupRequest request) {
-
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Ya existe un usuario con ese email");
         }
 
-        // 1. Crear el Usuario con Role.REP
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .role(Role.REP) // ✅ Asignamos el Enum directamente
+                .role(Role.REP)
                 .build();
 
         User savedUser = userRepository.save(user);
 
-        // 2. ✅ CRÍTICO: Crear el perfil de Rep vacío asociado
         RepProfile profile = RepProfile.builder()
                 .user(savedUser)
                 .active(true)
@@ -87,7 +76,7 @@ public class AuthenticationService {
         
         repProfileRepository.save(profile);
 
-        // 3. Generar Token
+        // ✅ CORREGIDO: .name()
         String token = jwtService.generateToken(savedUser.getEmail(), Role.REP.name());
 
         return LoginResponse.builder()
@@ -98,13 +87,9 @@ public class AuthenticationService {
                 .build();
     }
 
-    /**
-     * Refresh sencillo: recibe un token aún válido y devuelve uno nuevo.
-     */
     public LoginResponse refresh(RefreshTokenRequest request) {
         String oldToken = request.getToken();
 
-        // Validamos el token
         if (!jwtService.isTokenValid(oldToken)) {
             throw new BadCredentialsException("Token inválido o expirado");
         }
@@ -113,6 +98,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
 
+        // ✅ CORREGIDO: .name()
         String roleName = user.getRole().name();
         String newToken = jwtService.generateToken(user.getEmail(), roleName);
 

@@ -99,7 +99,8 @@ public class ReviewService {
                 .companyId(r.getCompany().getId())
                 .companyName(r.getCompany().getName())
                 .repId(r.getRep().getId())
-                .repFullName(r.getRep().getFullName())
+                // ✅ ESTO FUNCIONARÁ AL ARREGLAR RepProfile.java
+                .repFullName(r.getRep().getFullName()) 
                 .jobOfferId(r.getJobOffer() != null ? r.getJobOffer().getId() : null)
                 .jobTitle(r.getJobOffer() != null ? r.getJobOffer().getTitle() : null)
                 .rating(r.getRating())

@@ -1,6 +1,6 @@
-// frontend/src/routes.tsx
-import { Navigate } from "react-router-dom";
-import type { RouteObject } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+// 🟢 Importamos el componente de protección
+import { ProtectedRoute } from "./components/ProtectedRoute"; 
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -28,104 +28,81 @@ import CompanyDashboardPage from "./pages/company/CompanyDashboardPage";
 import CompanyJobsPage from "./pages/company/CompanyJobsPage";
 import CompanyApplicationsPage from "./pages/company/CompanyApplicationsPage";
 import CompanySettingsPage from "./pages/company/CompanySettingsPage";
+// ✅ Asumiendo que también necesitas una vista de aplicaciones por trabajo
+import CompanyJobApplicationsPage from "./pages/company/CompanyJobApplicationsPage"; 
 
-export const routes: RouteObject[] = [
-  // AUTH
-  {
-    path: "/",
-    element: <AuthLayout />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/login" replace />,
-      },
-      {
-        path: "login",
-        element: <LoginPage />,
-      },
+// 🟢 Exportamos el objeto router final
+export const router = createBrowserRouter([
+    // 1. Rutas Públicas/Auth
+    {
+        element: <AuthLayout />,
+        children: [
+            // Ruta raíz que redirige al login
             {
-        path: "register",
-        element: <RegisterPage />,
-      },
+                path: "/",
+                element: <Navigate to="/login" replace />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "register",
+                element: <RegisterPage />,
+            },
+        ],
+    },
 
-    ],
-  },
+    // 2. 🛡️ RUTAS PROTEGIDAS DE REP
+    {
+        path: "/rep",
+        // El elemento de protección se ejecuta primero
+        element: <ProtectedRoute allowedRoles={['REP', 'ADMIN']} />,
+        children: [
+            {
+                // El Layout se carga solo si la protección pasa
+                element: <RepLayout />,
+                children: [
+                    { path: "home", element: <HomePage userType="rep" /> },
+                    { path: "dashboard", element: <RepDashboardPage /> },
+                    { path: "profile", element: <RepProfilePage /> },
+                    { path: "applications", element: <RepApplicationsPage /> },
+                    { path: "offers", element: <RepOffersPage /> },
+                    { path: "training", element: <RepTrainingPage /> },
+                    { path: "settings", element: <RepSettingsPage /> },
+                    // Redirige /rep/ al dashboard
+                    { index: true, element: <Navigate to="/rep/dashboard" replace /> },
+                ],
+            },
+        ],
+    },
 
-  // REP (comerciales)
-  {
-    path: "/rep",
-    element: <RepLayout />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/rep/home" replace />,
-      },
-      {
-        path: "home",
-        element: <HomePage userType="rep" />,
-      },
-      {
-        path: "dashboard",
-        element: <RepDashboardPage />,
-      },
-      {
-        path: "profile",
-        element: <RepProfilePage />,
-      },
-      {
-        path: "applications",
-        element: <RepApplicationsPage />,
-      },
-      {
-        path: "offers",
-        element: <RepOffersPage />,
-      },
-      {
-        path: "training",
-        element: <RepTrainingPage />,
-      },
-      {
-        path: "settings",
-        element: <RepSettingsPage />,
-      },
-    ],
-  },
+    // 3. 🛡️ RUTAS PROTEGIDAS DE COMPANY
+    {
+        path: "/company",
+        // El elemento de protección se ejecuta primero
+        element: <ProtectedRoute allowedRoles={['COMPANY', 'ADMIN']} />,
+        children: [
+            {
+                // El Layout se carga solo si la protección pasa
+                element: <CompanyLayout />,
+                children: [
+                    { path: "home", element: <HomePage userType="company" /> },
+                    { path: "dashboard", element: <CompanyDashboardPage /> },
+                    { path: "jobs", element: <CompanyJobsPage /> },
+                    { path: "applications", element: <CompanyApplicationsPage /> },
+                    { path: "jobs/:jobId/applications", element: <CompanyJobApplicationsPage /> }, // Ruta detallada
+                    { path: "settings", element: <CompanySettingsPage /> },
+                    // Redirige /company/ al dashboard
+                    { index: true, element: <Navigate to="/company/dashboard" replace /> },
+                ],
+            },
+        ],
+    },
 
-  // COMPANY (empresas)
-  {
-    path: "/company",
-    element: <CompanyLayout />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/company/home" replace />,
-      },
-      {
-        path: "home",
-        element: <HomePage userType="company" />,
-      },
-      {
-        path: "dashboard",
-        element: <CompanyDashboardPage />,
-      },
-      {
-        path: "jobs",
-        element: <CompanyJobsPage />,
-      },
-      {
-        path: "applications",
-        element: <CompanyApplicationsPage />,
-      },
-      {
-        path: "settings",
-        element: <CompanySettingsPage />,
-      },
-    ],
-  },
-
-  // 404
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
-];
+    // 4. Fallback (404)
+    {
+        path: "*",
+        element: <NotFoundPage />,
+    },
+]);
