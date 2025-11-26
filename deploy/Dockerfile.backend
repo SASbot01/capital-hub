@@ -1,0 +1,19 @@
+# Etapa de compilación (usamos una imagen base completa para compilar)
+FROM eclipse-temurin:21-jdk-jammy as builder
+
+# Define el archivo JAR que se genera en la etapa de Maven
+ARG JAR_FILE=target/*.jar
+
+# Copia el JAR del proyecto al contenedor de compilación
+COPY ${JAR_FILE} app.jar
+
+# Etapa de ejecución (usamos una imagen JRE más ligera para producción)
+FROM eclipse-temurin:21-jre-jammy
+# Expone el puerto del servidor (8081)
+EXPOSE 8081
+
+# Copia el JAR compilado desde la etapa 'builder'
+COPY --from=builder app.jar app.jar
+
+# Punto de entrada para ejecutar la aplicación JAR
+ENTRYPOINT ["java", "-jar", "/app.jar"]
