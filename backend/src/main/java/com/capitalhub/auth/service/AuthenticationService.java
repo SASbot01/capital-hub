@@ -90,7 +90,7 @@ public class AuthenticationService {
     public LoginResponse refresh(RefreshTokenRequest request) {
         String oldToken = request.getToken();
 
-        if (!jwtService.isTokenValid(oldToken)) {
+        if (!jwtService.isTokenValid(oldToken, null)) {
             throw new BadCredentialsException("Token inválido o expirado");
         }
 

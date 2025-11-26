@@ -1,41 +1,32 @@
 import { apiClient } from './client';
-// 🚨 Importamos AxiosResponse para asegurar el correcto tipado de la respuesta
-import { AxiosResponse } from 'axios'; 
 
-interface ApplyPayload {
-    jobOfferId: number;
-}
-
-// 🟢 Tipo de la respuesta del Backend (POST /api/rep/applications)
 export interface ApplicationResponse {
     id: number;
     jobTitle: string;
     companyName: string;
-    status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+    status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'INTERVIEW' | 'OFFER_SENT' | 'HIRED' | 'WITHDRAWN';
     applicationDate: string;
+    interviewUrl?: string;
+    // ... otros campos si son necesarios
 }
 
 /**
- * Función para que el comercial aplique a una oferta de trabajo.
+ * Aplica a una oferta.
+ * URL: /api/rep/jobs/{offerId}/apply
  */
-// 🟢 Definición explícita del tipo de retorno: Promise<ApplicationResponse>
 export const applyToJob = async (jobOfferId: number): Promise<ApplicationResponse> => {
-    const payload: ApplyPayload = { jobOfferId };
-    
-    // Le decimos a .post qué tipo de datos esperamos que contenga la respuesta.
-    const response: AxiosResponse<ApplicationResponse> = await apiClient.post(
-        '/rep/applications', 
-        payload
+    // apiClient.post ya devuelve T, no AxiosResponse<T>
+    return await apiClient.post<ApplicationResponse>(
+        `/rep/jobs/${jobOfferId}/apply`, 
+        {}, // body vacío
+        true // auth
     );
-    
-    // Devolvemos el cuerpo de los datos (lo que sale del backend)
-    return response.data;
 };
 
 /**
- * Función para obtener todas las aplicaciones del REP autenticado.
+ * Obtiene las aplicaciones del REP.
+ * URL: /api/rep/applications
  */
 export const fetchRepApplications = async (): Promise<ApplicationResponse[]> => {
-    const response = await apiClient.get<ApplicationResponse[]>('/rep/applications');
-    return response.data;
+    return await apiClient.get<ApplicationResponse[]>('/rep/applications', true);
 };
