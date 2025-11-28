@@ -24,17 +24,19 @@ public class JobApplicationController {
     private final JobApplicationService applicationService;
     private final UserRepository userRepository;
 
-    @PreAuthorize("hasAuthority('REP')") // Cambiado a hasAuthority para coincidir con tu sistema de roles
+    // 1. REP: Aplicar a una oferta
+    @PreAuthorize("hasAuthority('REP')")
     @PostMapping("/rep/jobs/{offerId}/apply")
     @ResponseStatus(HttpStatus.CREATED)
     public ApplicationResponse apply(@PathVariable Long offerId,
                                      @Valid @RequestBody(required = false) ApplyRequest req,
                                      Authentication authentication) {
         Long repUserId = getUserIdFromAuth(authentication);
-        if (req == null) req = new ApplyRequest(); 
+        if (req == null) req = new ApplyRequest();
         return applicationService.applyToOffer(repUserId, offerId, req);
     }
 
+    // 2. REP: Ver mis aplicaciones
     @PreAuthorize("hasAuthority('REP')")
     @GetMapping("/rep/applications")
     public List<ApplicationResponse> myApplications(Authentication authentication) {
@@ -42,6 +44,7 @@ public class JobApplicationController {
         return applicationService.listMyApplications(repUserId);
     }
 
+    // 3. COMPANY: Ver aplicaciones de una oferta específica
     @PreAuthorize("hasAuthority('COMPANY')")
     @GetMapping("/company/jobs/{offerId}/applications")
     public List<ApplicationResponse> listApplicationsForOffer(@PathVariable Long offerId,
@@ -50,6 +53,15 @@ public class JobApplicationController {
         return applicationService.listApplicationsForOffer(companyUserId, offerId);
     }
 
+    // 4. COMPANY: Ver TODAS las aplicaciones recibidas (Global) ✅ NUEVO ENDPOINT
+    @PreAuthorize("hasAuthority('COMPANY')")
+    @GetMapping("/company/applications")
+    public List<ApplicationResponse> listAllCompanyApplications(Authentication authentication) {
+        Long companyUserId = getUserIdFromAuth(authentication);
+        return applicationService.listAllCompanyApplications(companyUserId);
+    }
+
+    // 5. COMPANY: Actualizar estado de una aplicación
     @PreAuthorize("hasAuthority('COMPANY')")
     @PatchMapping("/company/applications/{id}/status")
     public ApplicationResponse updateStatus(

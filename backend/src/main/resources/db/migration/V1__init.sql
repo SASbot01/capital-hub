@@ -1,21 +1,17 @@
-CREATE TABLE roles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
+-- 1. TABLA DE USUARIOS (Simplificada)
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(80),
     last_name VARCHAR(80),
-    role_id BIGINT NOT NULL,
+    role VARCHAR(50) NOT NULL, -- CAMBIO: Guardamos 'COMPANY', 'REP', 'ADMIN' directamente
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- 2. EMPRESAS
 CREATE TABLE companies (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
@@ -30,6 +26,7 @@ CREATE TABLE companies (
     CONSTRAINT fk_company_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- 3. PERFILES REP
 CREATE TABLE rep_profiles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
@@ -51,6 +48,7 @@ CREATE TABLE rep_profiles (
     CONSTRAINT fk_rep_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- 4. OFERTAS (JOB OFFERS)
 CREATE TABLE job_offers (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     company_id BIGINT NOT NULL,
@@ -78,6 +76,7 @@ CREATE TABLE job_offers (
     CONSTRAINT fk_job_company FOREIGN KEY (company_id) REFERENCES companies(id)
 );
 
+-- 5. APLICACIONES
 CREATE TABLE job_applications (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     job_offer_id BIGINT NOT NULL,
@@ -95,6 +94,7 @@ CREATE TABLE job_applications (
     CONSTRAINT fk_app_rep FOREIGN KEY (rep_id) REFERENCES rep_profiles(id)
 );
 
+-- 6. REVIEWS
 CREATE TABLE reviews (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     company_id BIGINT NOT NULL,
@@ -110,4 +110,48 @@ CREATE TABLE reviews (
     CONSTRAINT fk_review_company FOREIGN KEY (company_id) REFERENCES companies(id),
     CONSTRAINT fk_review_rep FOREIGN KEY (rep_id) REFERENCES rep_profiles(id),
     CONSTRAINT fk_review_job FOREIGN KEY (job_offer_id) REFERENCES job_offers(id)
+);
+
+-- 7. CATÁLOGOS
+CREATE TABLE industries (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) UNIQUE NOT NULL
+);
+
+CREATE TABLE languages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE crm_types (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 8. TRAINING
+CREATE TABLE courses (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE lessons (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    title VARCHAR(200),
+    content TEXT,
+    video_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_lesson_course FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
+CREATE TABLE user_progress (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    lesson_id BIGINT NOT NULL,
+    completed BOOLEAN DEFAULT FALSE,
+    completed_at TIMESTAMP NULL,
+    CONSTRAINT fk_progress_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_progress_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );

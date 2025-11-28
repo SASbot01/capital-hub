@@ -5,10 +5,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 
-// ---------------------------------------------------
 // 🟢 Definición de Tipos de Datos del Backend
-// (Asumiendo que el backend devuelve esta estructura)
-// ---------------------------------------------------
 interface DashboardData {
     monthlyStats: {
         callsMade: number;
@@ -17,7 +14,6 @@ interface DashboardData {
         estimatedCommission: number;
     };
     latestProcesses: LatestProcess[];
-    // Podrías añadir aquí los datos de actividad semanal si el backend los devuelve
 }
 
 interface LatestProcess {
@@ -27,7 +23,6 @@ interface LatestProcess {
     status: 'APPLIED' | 'INTERVIEW' | 'OFFER_SENT' | 'HIRED' | 'REJECTED';
 }
 
-// Datos MOCK de Actividad (Mantenemos el mock hasta que el backend envíe estos datos)
 const ACTIVIDAD: { label: string; value: string; hint: string }[] = [
     { label: "Llamadas esta semana", value: "38", hint: "Objetivo: 45" },
     { label: "Reuniones agendadas", value: "12", hint: "+3 vs semana pasada" },
@@ -38,8 +33,9 @@ export default function RepDashboardPage() {
     useAuth();
     
     // 🟢 1. Conexión al Backend
+    // CORREGIDO: Usamos la ruta relativa limpia. El client.ts añadirá /api si falta.
     const { data, isLoading, error, refetch } = useFetch<DashboardData>(
-        '/api/rep/dashboard/stats', 
+        '/rep/dashboard/stats', 
         true
     );
     
@@ -53,14 +49,9 @@ export default function RepDashboardPage() {
 
     const latestProcesses = data?.latestProcesses || [];
 
-    // ---------------------------------------------------
-    // 🟢 3. Manejo de Estado (Loading y Error)
-    // ---------------------------------------------------
-
     if (isLoading) {
         return (
             <>
-                {/* Asumimos que Topbar se renderiza con el usuario cargado del AuthContext */}
                 <Topbar title="Dashboard" subtitle="Cargando tu resumen..." /> 
                 <div className="text-center py-10 text-neutral-500">Cargando datos del servidor...</div>
             </>
@@ -80,10 +71,6 @@ export default function RepDashboardPage() {
             </>
         );
     }
-
-    // ---------------------------------------------------
-    // 4. Renderizado con Datos
-    // ---------------------------------------------------
 
     return (
         <>
@@ -105,9 +92,8 @@ export default function RepDashboardPage() {
                     ))}
                 </section>
 
-                {/* BLOQUE CENTRAL: PROCESOS + ACTIVIDAD */}
+                {/* BLOQUE CENTRAL */}
                 <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Procesos en curso */}
                     <div className="lg:col-span-2 bg-white rounded-3xl border border-neutral-200 px-6 py-5">
                         <div className="flex items-center justify-between mb-4">
                             <div>
@@ -116,7 +102,6 @@ export default function RepDashboardPage() {
                                     Seguimiento rápido de tus oportunidades activas.
                                 </p>
                             </div>
-
                             <Link
                                 to="/rep/applications"
                                 className="text-xs px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-50 transition"
@@ -127,78 +112,48 @@ export default function RepDashboardPage() {
 
                         <div className="space-y-3">
                             {latestProcesses.map((p) => (
-                                <div
-                                    key={p.id}
-                                    className="flex items-center justify-between rounded-2xl border border-neutral-200 px-4 py-3 bg-neutral-50/60"
-                                >
+                                <div key={p.id} className="flex items-center justify-between rounded-2xl border border-neutral-200 px-4 py-3 bg-neutral-50/60">
                                     <div>
                                         <p className="text-sm font-medium">{p.companyName}</p>
-                                        <p className="text-xs text-neutral-500 mt-0.5">
-                                            {p.jobTitle}
-                                        </p>
+                                        <p className="text-xs text-neutral-500 mt-0.5">{p.jobTitle}</p>
                                     </div>
-                                    {/* Normalizamos el estado para la UI */}
                                     <span className="text-[11px] px-3 py-1 rounded-full bg-black text-white">
                                         {p.status.replaceAll('_', ' ')}
                                     </span>
                                 </div>
                             ))}
-
                             {latestProcesses.length === 0 && (
                                 <p className="text-xs text-neutral-500 text-center py-6">
-                                    No tienes procesos activos. Cuando apliques a nuevos puestos,
-                                    aparecerán aquí.
+                                    No tienes procesos activos.
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    {/* Actividad semanal (Usando el Mock temporal) */}
+                    {/* Actividad semanal */}
                     <div className="bg-white rounded-3xl border border-neutral-200 px-6 py-5 flex flex-col">
-                        <h2 className="text-sm font-semibold mb-1">
-                            Actividad de esta semana
-                        </h2>
-                        <p className="text-xs text-neutral-500 mb-4">
-                            Mini resumen operativo de tus números.
-                        </p>
-
+                        <h2 className="text-sm font-semibold mb-1">Actividad de esta semana</h2>
+                        <p className="text-xs text-neutral-500 mb-4">Mini resumen operativo.</p>
                         <div className="space-y-3 mb-4">
                             {ACTIVIDAD.map((a) => (
-                                <div
-                                    key={a.label}
-                                    className="flex items-center justify-between rounded-2xl bg-neutral-50 px-4 py-2.5"
-                                >
-                                    {/* Contenido mockeado */}
+                                <div key={a.label} className="flex items-center justify-between rounded-2xl bg-neutral-50 px-4 py-2.5">
                                     <div>
                                         <p className="text-xs text-neutral-500">{a.label}</p>
-                                        <p className="text-[11px] text-neutral-400 mt-0.5">
-                                            {a.hint}
-                                        </p>
+                                        <p className="text-[11px] text-neutral-400 mt-0.5">{a.hint}</p>
                                     </div>
                                     <p className="text-base font-semibold">{a.value}</p>
                                 </div>
                             ))}
                         </div>
-
-                        {/* Placeholder gráfico */}
                         <div className="mt-auto">
-                            <div className="text-[11px] text-neutral-500 mb-2">
-                                Ritmo semanal (placeholder)
-                            </div>
+                            <div className="text-[11px] text-neutral-500 mb-2">Ritmo semanal</div>
                             <div className="h-24 rounded-2xl bg-neutral-50 border border-dashed border-neutral-200 flex items-center justify-center text-[11px] text-neutral-400">
-                                Aquí irán gráficos
+                                Gráficos próximamente
                             </div>
                         </div>
                     </div>
-                </section>
-
-                {/* BLOQUE INFERIOR (ESTÁTICO) */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Contenido estático ... */}
                 </section>
             </div>
         </>
     );
 }
-
-// Removido el componente ActivityPanel ya que integré el JSX directamente.

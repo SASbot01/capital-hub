@@ -20,7 +20,7 @@ public class CompanyController {
 
     // ✅ Obtener perfil de empresa (para el dashboard settings de company)
     // GET /api/company/me
-    @PreAuthorize("hasRole('COMPANY')")
+    @PreAuthorize("hasAuthority('COMPANY')")
     @GetMapping("/me")
     public CompanyProfileResponse getMyProfile(Principal principal) {
         Long userId = extractUserId(principal);
@@ -29,7 +29,7 @@ public class CompanyController {
 
     // ✅ Actualizar perfil de empresa
     // PUT /api/company/me
-    @PreAuthorize("hasRole('COMPANY')")
+    @PreAuthorize("hasAuthority('COMPANY')")
     @PutMapping("/me")
     public CompanyProfileResponse updateMyProfile(@Valid @RequestBody CompanyProfileUpdateRequest req,
                                                   Principal principal) {

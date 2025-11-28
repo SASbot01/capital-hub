@@ -1,4 +1,4 @@
-package com.capitalhub.rep.entity;
+ package com.capitalhub.rep.entity;
 
 public enum RepRole {
     SETTER,

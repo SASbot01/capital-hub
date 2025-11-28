@@ -1,10 +1,4 @@
--- 1. ROLES DEL SISTEMA
-INSERT INTO roles (name) VALUES 
-('ADMIN'),
-('COMPANY'),
-('REP');
-
--- 2. INDUSTRIAS
+-- 1. INDUSTRIAS
 INSERT INTO industries (name) VALUES
 ('Marketing'),
 ('Consultoría'),
@@ -16,7 +10,7 @@ INSERT INTO industries (name) VALUES
 ('Salud y Bienestar'),
 ('Servicios Empresariales');
 
--- 3. IDIOMAS
+-- 2. IDIOMAS
 INSERT INTO languages (name) VALUES
 ('Español'),
 ('Inglés'),
@@ -25,7 +19,7 @@ INSERT INTO languages (name) VALUES
 ('Alemán'),
 ('Italiano');
 
--- 4. TIPOS DE CRM
+-- 3. TIPOS DE CRM
 INSERT INTO crm_types (name) VALUES
 ('HubSpot'),
 ('GoHighLevel'),

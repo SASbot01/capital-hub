@@ -87,6 +87,19 @@ public class JobApplicationService {
                 .collect(Collectors.toList());
     }
 
+    // ✅ MÉTODO NUEVO QUE FALTABA: Listar TODAS las aplicaciones de una empresa
+    @Transactional(readOnly = true)
+    public List<ApplicationResponse> listAllCompanyApplications(Long companyUserId) {
+        Company company = companyRepository.findByUserId(companyUserId)
+                .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
+
+        // IMPORTANTE: Para que esto funcione, JobApplicationRepository debe tener el método 'findByJobOffer_CompanyId'
+        // Si no lo tienes, añádelo al repositorio como te mostré antes.
+        return applicationRepository.findByJobOffer_CompanyId(company.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public ApplicationResponse updateApplicationStatus(Long companyUserId, Long applicationId, 
                                                        ApplicationStatus status, String companyNotes, 
@@ -102,7 +115,7 @@ public class JobApplicationService {
         }
 
         // Lógica de negocio para cambios de estado
-        app.setStatus(status); // Seteamos el estado base
+        app.setStatus(status); 
         
         if (status == ApplicationStatus.INTERVIEW && interviewUrl != null) {
             app.markInterview(interviewUrl);
@@ -111,9 +124,6 @@ public class JobApplicationService {
         } else if (status == ApplicationStatus.REJECTED) {
             app.markRejected(companyNotes);
         }
-        // Faltaban estos métodos en la entidad, pero podemos setear el estado directamente si la entidad no los tiene
-        // app.markOfferSent(); 
-        // app.markWithdrawn();
 
         if (companyNotes != null) app.setCompanyNotes(companyNotes);
 
@@ -128,6 +138,8 @@ public class JobApplicationService {
                 .jobRole(app.getJobOffer().getRole().name())
                 .companyId(app.getJobOffer().getCompany().getId())
                 .companyName(app.getJobOffer().getCompany().getName()) 
+                .repId(app.getRep().getId())
+                .repFullName(app.getRep().getFullName()) // Asegúrate de que RepProfile tiene este método
                 .status(app.getStatus())
                 .repMessage(app.getRepMessage())
                 .companyNotes(app.getCompanyNotes())

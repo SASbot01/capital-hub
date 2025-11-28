@@ -33,25 +33,48 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role; // ADMIN, COMPANY, REP
 
+    // Coincide con la columna is_active de tu SQL
+    @Column(name = "is_active")
+    @Builder.Default
+    private Boolean active = true;
+
     // --- Métodos de Spring Security ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        // 🚀 CORRECCIÓN CRÍTICA: Devolvemos solo el nombre (ej: "REP")
+        // para que coincida con @PreAuthorize("hasAuthority('REP')") en tus controladores.
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
-    public String getUsername() { return email; }
+    public String getPassword() {
+        return password;
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public String getUsername() {
+        return email;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // Si el campo es nulo, asumimos true para no bloquear
+        return active != null ? active : true;
+    }
 }

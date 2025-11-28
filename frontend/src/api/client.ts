@@ -1,7 +1,5 @@
 // frontend/src/api/client.ts
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
 export interface ApiError {
   status: number;
@@ -13,23 +11,33 @@ async function request<T>(
   options: RequestInit = {},
   auth: boolean = false
 ): Promise<T> {
-  const url = `${API_BASE_URL}${path}`;
+  
+  // Normalizar ruta
+  let normalizedPath = path;
+  if (!normalizedPath.startsWith("/api")) {
+    normalizedPath = `/api${path.startsWith("/") ? "" : "/"}${path}`;
+  }
+  const url = `${API_BASE_URL}${normalizedPath}`;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
   };
 
-  // Si la petición requiere auth, añadimos el token si existe
+  // --- LOGICA DE TOKEN ---
   if (auth) {
-    const token =
-      localStorage.getItem("accessToken") ||
-      sessionStorage.getItem("accessToken");
+    // Intentamos leer de ambos sitios
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
     if (token) {
       (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+      // 👇 ESTO NOS DIRÁ SI HAY TOKEN
+      console.log(`🔑 Enviando Token a ${normalizedPath}:`, token.substring(0, 10) + "..."); 
+    } else {
+      console.warn(`⚠️ ALERTA: Se requiere auth para ${normalizedPath} pero NO HAY TOKEN guardado.`);
     }
   }
+  // ----------------------
 
   const res = await fetch(url, {
     ...options,
@@ -38,52 +46,28 @@ async function request<T>(
 
   if (!res.ok) {
     let message = "Error en la comunicación con el servidor";
-
     try {
       const data = await res.json();
-      if (data?.message) {
-        message = data.message;
-      }
-    } catch {
-      // ignoramos error al parsear
+      if (data?.message) message = data.message;
+    } catch { }
+
+    console.error(`❌ Error ${res.status} en ${normalizedPath}: ${message}`);
+    
+    // Si el token caducó o es inválido, limpiamos para obligar a reloguear
+    if (res.status === 403) {
+        console.error("⛔ Acceso denegado (403). Revisa roles o validez del token.");
     }
 
-    const error: ApiError = {
-      status: res.status,
-      message,
-    };
+    const error: ApiError = { status: res.status, message };
     throw error;
   }
 
-  // Si no hay contenido (204, etc.)
-  if (res.status === 204) {
-    return {} as T;
-  }
-
+  if (res.status === 204) return {} as T;
   return (await res.json()) as T;
 }
 
 export const apiClient = {
-  get: <T>(path: string, auth: boolean = false) =>
-    request<T>(path, { method: "GET" }, auth),
-
-  post: <T>(path: string, body?: any, auth: boolean = false) =>
-    request<T>(
-      path,
-      {
-        method: "POST",
-        body: body ? JSON.stringify(body) : undefined,
-      },
-      auth
-    ),
-
-  put: <T>(path: string, body?: any, auth: boolean = false) =>
-    request<T>(
-      path,
-      {
-        method: "PUT",
-        body: body ? JSON.stringify(body) : undefined,
-      },
-      auth
-    ),
+  get: <T>(path: string, auth: boolean = false) => request<T>(path, { method: "GET" }, auth),
+  post: <T>(path: string, body?: any, auth: boolean = false) => request<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined }, auth),
+  put: <T>(path: string, body?: any, auth: boolean = false) => request<T>(path, { method: "PUT", body: body ? JSON.stringify(body) : undefined }, auth),
 };

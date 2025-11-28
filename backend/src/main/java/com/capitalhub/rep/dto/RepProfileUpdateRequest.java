@@ -8,13 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RepProfileResponse {
-    private Long id;
-    private Long userId;
-    private String email;
+public class RepProfileUpdateRequest {
     private String firstName;
     private String lastName;
-    private String fullName;
     
     private RepRole roleType;
     private String bio;
@@ -24,7 +20,4 @@ public class RepProfileResponse {
     
     private String linkedinUrl;
     private String portfolioUrl;
-    private String avatarUrl;
-    private String introVideoUrl;
-    private String bestCallUrl;
 }

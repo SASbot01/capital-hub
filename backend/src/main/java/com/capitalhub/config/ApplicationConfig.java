@@ -1,6 +1,6 @@
 package com.capitalhub.config;
 
-import com.capitalhub.auth.repository.UserRepository; // ⚠️ Verifica que esta ruta sea correcta en tu proyecto
+import com.capitalhub.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

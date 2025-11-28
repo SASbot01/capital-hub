@@ -37,7 +37,7 @@ export function useFetch<T>(endpoint: string, immediate: boolean = true) {
 
     try {
       // Usamos el cliente API, que automáticamente añade el token JWT
-      const response = await apiClient.get<T>(endpoint);
+      const response = await apiClient.get<T>(endpoint, true); // ✅ auth = true
       
       setState({
         data: response,

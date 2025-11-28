@@ -8,6 +8,7 @@ C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\a
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\applications\entity\JobApplication.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\applications\service\JobApplicationService.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\config\JwtAuthenticationFilter.java
+C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\dto\RepProfileUpdateRequest.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\service\RepProfileService.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\service\RepService.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\company\service\CompanyService.java
@@ -15,7 +16,6 @@ C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\a
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\jobs\repository\JobOfferRepository.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\entity\RepRole.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\jobs\controller\JobOfferController.java
-C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\config\CorsConfig.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\applications\repository\JobApplicationRepository.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\controller\RepController.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\auth\dto\RegisterRequest.java
@@ -39,6 +39,7 @@ C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\r
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\applications\controller\JobApplicationController.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\company\repository\CompanyRepository.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\config\MinioConfig.java
+C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\dashboard\controller\DashboardController.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\jobs\dto\JobOfferResponse.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\reviews\service\ReviewService.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\auth\dto\RefreshTokenRequest.java
@@ -53,5 +54,4 @@ C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\m
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\config\SecurityConfig.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\auth\dto\LoginResponse.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\reviews\dto\ReviewRequest.java
-C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\dto\RepProfileRequest.java
 C:\Users\aleja\Desktop\capitalhub - copia\backend\src\main\java\com\capitalhub\rep\entity\RepProfile.java

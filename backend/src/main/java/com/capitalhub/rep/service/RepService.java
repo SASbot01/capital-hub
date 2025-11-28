@@ -1,34 +1,75 @@
 package com.capitalhub.rep.service;
 
+import com.capitalhub.auth.repository.UserRepository;
+import com.capitalhub.rep.dto.RepProfileResponse;
+import com.capitalhub.rep.dto.RepProfileUpdateRequest;
 import com.capitalhub.rep.entity.RepProfile;
 import com.capitalhub.rep.repository.RepProfileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
 public class RepService {
 
     private final RepProfileRepository repProfileRepository;
+    private final UserRepository userRepository;
 
-    public RepProfile getMyProfile(Long userId) {
-        return repProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Perfil no encontrado"));
+    public RepProfileResponse getMyProfile(Long userId) {
+        RepProfile rep = repProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Perfil de comercial no encontrado"));
+        return mapToResponse(rep);
     }
 
-    public RepProfile updateProfile(Long userId, RepProfile updates) {
-        RepProfile profile = getMyProfile(userId);
+    public RepProfileResponse updateMyProfile(Long userId, RepProfileUpdateRequest req) {
+        RepProfile rep = repProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Perfil de comercial no encontrado"));
 
-        if (updates.getBio() != null) profile.setBio(updates.getBio());
-        if (updates.getPhone() != null) profile.setPhone(updates.getPhone());
-        if (updates.getCity() != null) profile.setCity(updates.getCity());
-        if (updates.getCountry() != null) profile.setCountry(updates.getCountry());
-        if (updates.getLinkedinUrl() != null) profile.setLinkedinUrl(updates.getLinkedinUrl());
-        if (updates.getPortfolioUrl() != null) profile.setPortfolioUrl(updates.getPortfolioUrl());
-        if (updates.getAvatarUrl() != null) profile.setAvatarUrl(updates.getAvatarUrl());
-        // Agrega aquí más campos si tu entidad RepProfile los tiene (skills, experience, etc.)
+        // Actualizar datos básicos de usuario
+        if (StringUtils.hasText(req.getFirstName())) rep.getUser().setFirstName(req.getFirstName());
+        if (StringUtils.hasText(req.getLastName())) rep.getUser().setLastName(req.getLastName());
+        userRepository.save(rep.getUser());
 
-        return repProfileRepository.save(profile);
+        // Actualizar perfil
+        if (req.getRoleType() != null) rep.setRoleType(req.getRoleType());
+        if (req.getBio() != null) rep.setBio(req.getBio());
+        if (req.getPhone() != null) rep.setPhone(req.getPhone());
+        if (req.getCity() != null) rep.setCity(req.getCity());
+        if (req.getCountry() != null) rep.setCountry(req.getCountry());
+        if (req.getLinkedinUrl() != null) rep.setLinkedinUrl(req.getLinkedinUrl());
+        if (req.getPortfolioUrl() != null) rep.setPortfolioUrl(req.getPortfolioUrl());
+
+        RepProfile saved = repProfileRepository.save(rep);
+        return mapToResponse(saved);
+    }
+    
+    public RepProfileResponse updateAvatar(Long userId, String url) {
+        RepProfile rep = repProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Perfil no encontrado"));
+        rep.setAvatarUrl(url);
+        return mapToResponse(repProfileRepository.save(rep));
+    }
+
+    private RepProfileResponse mapToResponse(RepProfile p) {
+        return RepProfileResponse.builder()
+                .id(p.getId())
+                .userId(p.getUser().getId())
+                .email(p.getUser().getEmail())
+                .firstName(p.getUser().getFirstName())
+                .lastName(p.getUser().getLastName())
+                .fullName(p.getFullName())
+                .roleType(p.getRoleType())
+                .bio(p.getBio())
+                .phone(p.getPhone())
+                .city(p.getCity())
+                .country(p.getCountry())
+                .linkedinUrl(p.getLinkedinUrl())
+                .portfolioUrl(p.getPortfolioUrl())
+                .avatarUrl(p.getAvatarUrl())
+                .introVideoUrl(p.getIntroVideoUrl())
+                .bestCallUrl(p.getBestCallUrl())
+                .build();
     }
 }

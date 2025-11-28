@@ -38,14 +38,10 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        // Añadimos el rol al token para facilitar cosas
+        extraClaims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+        
         return buildToken(extraClaims, userDetails.getUsername(), jwtExpiration);
-    }
-    
-    // Método extra para simplificar el login manual por email/rol
-    public String generateToken(String email, String role) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
-        return buildToken(claims, email, jwtExpiration);
     }
 
     private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
@@ -83,9 +79,5 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-    
-    public String getEmailFromToken(String token) {
-        return extractUsername(token);
     }
 }

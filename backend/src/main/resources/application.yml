@@ -9,11 +9,11 @@ spring:
     url: jdbc:mysql://localhost:3306/capitalhub?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: admin
-  jpa:
+jpa:
     hibernate:
-      ddl-auto: update # Usar 'update' para el MVP es más seguro si Flyway falla
+      ddl-auto: validate  # Cambiar 'update' por 'validate'
     show-sql: true
-  flyway:
+flyway:
     enabled: true
     baseline-on-migrate: true # Importante si la DB ya tiene cosas
 

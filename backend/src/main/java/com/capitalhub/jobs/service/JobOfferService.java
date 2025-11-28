@@ -61,18 +61,22 @@ public class JobOfferService {
                 .toList();
     }
 
+    // Método original (Filtraba por rol)
     public List<JobOfferResponse> listOffersForRep(RepRole repRole) {
         List<RepRole> allowedRoles = new ArrayList<>();
-        if (repRole == RepRole.SETTER) {
-            allowedRoles.add(RepRole.SETTER);
-            allowedRoles.add(RepRole.BOTH);
-        } else if (repRole == RepRole.CLOSER) {
-            allowedRoles.add(RepRole.CLOSER);
-            allowedRoles.add(RepRole.BOTH);
-        } else if (repRole == RepRole.COLD_CALLER) {
-            allowedRoles.add(RepRole.COLD_CALLER);
-            allowedRoles.add(RepRole.BOTH);
+        if (repRole != null) {
+            if (repRole == RepRole.SETTER) {
+                allowedRoles.add(RepRole.SETTER);
+                allowedRoles.add(RepRole.BOTH);
+            } else if (repRole == RepRole.CLOSER) {
+                allowedRoles.add(RepRole.CLOSER);
+                allowedRoles.add(RepRole.BOTH);
+            } else if (repRole == RepRole.COLD_CALLER) {
+                allowedRoles.add(RepRole.COLD_CALLER);
+                allowedRoles.add(RepRole.BOTH);
+            }
         } else {
+            // Si el rep no tiene rol definido, mostramos todo
             allowedRoles.add(RepRole.SETTER);
             allowedRoles.add(RepRole.CLOSER);
             allowedRoles.add(RepRole.COLD_CALLER);
@@ -82,6 +86,15 @@ public class JobOfferService {
         return jobOfferRepository.findByActiveTrueAndRoleIn(allowedRoles)
                 .stream()
                 .filter(o -> o.getStatus() == JobStatus.ACTIVE)
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ✅✅ EL MÉTODO QUE FALTABA (NUEVO) ✅✅
+    // Este es el que usa el Controlador para mostrar TODO a los comerciales en el MVP
+    public List<JobOfferResponse> listAllActiveOffers() {
+        return jobOfferRepository.findAll().stream()
+                .filter(o -> Boolean.TRUE.equals(o.getActive()) && o.getStatus() == JobStatus.ACTIVE)
                 .map(this::mapToResponse)
                 .toList();
     }

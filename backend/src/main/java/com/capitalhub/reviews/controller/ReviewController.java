@@ -22,7 +22,7 @@ public class ReviewController {
 
     // ✅ Empresa deja una review a un REP
     // POST /api/company/reviews
-    @PreAuthorize("hasRole('COMPANY')")
+    @PreAuthorize("hasAuthority('COMPANY')")
     @PostMapping("/company/reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewResponse createReview(@Valid @RequestBody ReviewRequest req,
@@ -33,7 +33,7 @@ public class ReviewController {
 
     // ✅ REP ve sus reviews
     // GET /api/rep/reviews
-    @PreAuthorize("hasRole('REP')")
+    @PreAuthorize("hasAuthority('REP')")
     @GetMapping("/rep/reviews")
     public List<ReviewResponse> myReviews(Principal principal) {
         Long repUserId = extractUserId(principal);
@@ -42,7 +42,7 @@ public class ReviewController {
 
     // ✅ Empresa ve sus reviews dejadas
     // GET /api/company/reviews
-    @PreAuthorize("hasRole('COMPANY')")
+    @PreAuthorize("hasAuthority('COMPANY')")
     @GetMapping("/company/reviews")
     public List<ReviewResponse> companyReviews(Principal principal) {
         Long companyUserId = extractUserId(principal);
