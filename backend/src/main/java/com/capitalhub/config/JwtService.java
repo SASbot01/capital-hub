@@ -41,7 +41,7 @@ public class JwtService {
         return buildToken(extraClaims, userDetails.getUsername(), jwtExpiration);
     }
     
-    // Método extra para simplificar el login manual
+    // Método extra para simplificar el login manual por email/rol
     public String generateToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
@@ -84,9 +84,8 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-    public String getEmailFromToken(String oldToken) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmailFromToken'");
+    
+    public String getEmailFromToken(String token) {
+        return extractUsername(token);
     }
 }

@@ -1,28 +1,28 @@
 version: '3.8'
 
 services:
-  # 1. DATABASE
+  # 1. BASE DE DATOS (MySQL)
   capitalhub-mysql:
     image: mysql:8.0
     container_name: capitalhub-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: capitalhub
-      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin  # Contraseña root
+      MYSQL_DATABASE: capitalhub  # Nombre de la DB que creará automáticamente
+      MYSQL_PASSWORD: admin       # Contraseña usuario
     ports:
-      - "3306:3306"
+      - "3306:3306"               # IMPORTANTE: Expone el puerto 3306 a tu máquina local
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql # Persistencia de datos
 
-  # 2. MINIO
+  # 2. ALMACENAMIENTO (MinIO - Similar a S3)
   capitalhub-minio:
     image: minio/minio
     container_name: capitalhub-minio
     restart: always
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000" # Puerto API
+      - "9001:9001" # Puerto Consola Web
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -30,39 +30,7 @@ services:
     volumes:
       - minio_data:/data
 
-  # 3. BACKEND
-  capitalhub-backend:
-    build:
-      context: ../backend
-      dockerfile: ../deploy/Dockerfile.backend
-    container_name: capitalhub-backend
-    restart: always
-    ports:
-      - "8081:8081"
-    depends_on:
-      - capitalhub-mysql
-      - capitalhub-minio
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://capitalhub-mysql:3306/capitalhub?useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: admin
-      MINIO_URL: http://capitalhub-minio:9000
-
-  # 4. FRONTEND
-  capitalhub-frontend:
-    build:
-      context: ../frontend
-      dockerfile: ../deploy/Dockerfile.frontend
-    container_name: capitalhub-frontend
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - capitalhub-backend
-    # Nota: Vite compila las vars de entorno en tiempo de BUILD (en el Dockerfile),
-    # pero como fallback usará localhost si no se define.
-    # Para Docker, el navegador del cliente es quien hace la petición, así que localhost es correcto.
-
+# Volúmenes para que los datos no se borren al reiniciar
 volumes:
   mysql_data:
   minio_data:

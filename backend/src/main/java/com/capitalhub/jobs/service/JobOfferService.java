@@ -32,7 +32,7 @@ public class JobOfferService {
                 .description(req.getDescription())
                 .role(req.getRole())
                 .seats(req.getSeats())
-                .maxApplicants(req.getSeats() * 20) // Regla de negocio MVP
+                .maxApplicants(req.getSeats() * 20)
                 .applicantsCount(0)
                 .language(req.getLanguage())
                 .crm(req.getCrm())
@@ -63,7 +63,6 @@ public class JobOfferService {
 
     public List<JobOfferResponse> listOffersForRep(RepRole repRole) {
         List<RepRole> allowedRoles = new ArrayList<>();
-        // Un Setter ve ofertas de SETTER y de BOTH
         if (repRole == RepRole.SETTER) {
             allowedRoles.add(RepRole.SETTER);
             allowedRoles.add(RepRole.BOTH);
@@ -74,7 +73,6 @@ public class JobOfferService {
             allowedRoles.add(RepRole.COLD_CALLER);
             allowedRoles.add(RepRole.BOTH);
         } else {
-            // BOTH o cualquier otro ve todo (simplificado)
             allowedRoles.add(RepRole.SETTER);
             allowedRoles.add(RepRole.CLOSER);
             allowedRoles.add(RepRole.COLD_CALLER);

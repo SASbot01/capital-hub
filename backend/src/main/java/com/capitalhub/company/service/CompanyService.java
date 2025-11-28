@@ -15,9 +15,6 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
 
-    /**
-     * Devuelve el perfil de empresa asociado al userId (del token).
-     */
     public CompanyProfileResponse getMyProfile(Long userId) {
         Company company = companyRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada para este usuario"));
@@ -25,62 +22,30 @@ public class CompanyService {
         return mapToResponse(company);
     }
 
-    /**
-     * Actualiza el perfil de empresa (datos generales, métricas y links).
-     */
     public CompanyProfileResponse updateMyProfile(Long userId, CompanyProfileUpdateRequest req) {
-
         Company company = companyRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada para este usuario"));
 
-        // Actualizamos solo si nos mandan valor (para que sea tipo "patch" sencillo)
         if (StringUtils.hasText(req.getName())) {
             company.setName(req.getName());
         }
-        if (req.getWebsite() != null) {
-            company.setWebsite(req.getWebsite());
-        }
-        if (req.getIndustry() != null) {
-            company.setIndustry(req.getIndustry());
-        }
-        if (req.getDescription() != null) {
-            company.setDescription(req.getDescription());
-        }
+        if (req.getWebsite() != null) company.setWebsite(req.getWebsite());
+        if (req.getIndustry() != null) company.setIndustry(req.getIndustry());
+        if (req.getDescription() != null) company.setDescription(req.getDescription());
 
-        if (req.getMonthlyRevenue() != null) {
-            company.setMonthlyRevenue(req.getMonthlyRevenue());
-        }
-        if (req.getMonthlyCalls() != null) {
-            company.setMonthlyCalls(req.getMonthlyCalls());
-        }
-        if (req.getMonthlyClosedDeals() != null) {
-            company.setMonthlyClosedDeals(req.getMonthlyClosedDeals());
-        }
-        if (req.getWinRate() != null) {
-            company.setWinRate(req.getWinRate());
-        }
+        // Mapeo de campos antiguos del DTO a los nuevos de la Entidad
+        if (req.getMonthlyRevenue() != null) company.setProjectionMrr(req.getMonthlyRevenue());
+        if (req.getWinRate() != null) company.setProjectionGrowth(req.getWinRate().intValue()); // Adaptación temporal
+        
+        if (req.getOfferVideoUrl() != null) company.setVideoOfferUrl(req.getOfferVideoUrl());
 
-        if (req.getOfferVideoUrl() != null) {
-            company.setOfferVideoUrl(req.getOfferVideoUrl());
-        }
-
-        if (req.getCalendlyUrl() != null) {
-            company.setCalendlyUrl(req.getCalendlyUrl());
-        }
-        if (req.getZoomUrl() != null) {
-            company.setZoomUrl(req.getZoomUrl());
-        }
-        if (req.getWhatsappUrl() != null) {
-            company.setWhatsappUrl(req.getWhatsappUrl());
-        }
-
+        // Estos campos no existen en la tabla companies actual, los omitimos o los guardamos en 'about' si es crítico
+        // company.setCalendlyUrl(...); 
+        
         Company saved = companyRepository.save(company);
         return mapToResponse(saved);
     }
 
-    // -----------------------
-    // Mapper
-    // -----------------------
     private CompanyProfileResponse mapToResponse(Company c) {
         return CompanyProfileResponse.builder()
                 .id(c.getId())
@@ -89,17 +54,15 @@ public class CompanyService {
                 .website(c.getWebsite())
                 .industry(c.getIndustry())
                 .description(c.getDescription())
-                .monthlyRevenue(c.getMonthlyRevenue())
-                .monthlyCalls(c.getMonthlyCalls())
-                .monthlyClosedDeals(c.getMonthlyClosedDeals())
-                .winRate(c.getWinRate())
-                .offerVideoUrl(c.getOfferVideoUrl())
-                .calendlyUrl(c.getCalendlyUrl())
-                .zoomUrl(c.getZoomUrl())
-                .whatsappUrl(c.getWhatsappUrl())
-                .active(c.getActive())
+                .monthlyRevenue(c.getProjectionMrr())
+                // .monthlyCalls(0) // No existe en DB
+                // .monthlyClosedDeals(0) // No existe en DB
+                .winRate(c.getProjectionGrowth() != null ? c.getProjectionGrowth().doubleValue() : 0.0)
+                .offerVideoUrl(c.getVideoOfferUrl())
+                // .calendlyUrl(...) // No existe en DB
+                .active(true) // Default
                 .createdAt(c.getCreatedAt())
-                .updatedAt(c.getUpdatedAt())
+                .updatedAt(c.getCreatedAt()) // Temporal
                 .build();
     }
 }

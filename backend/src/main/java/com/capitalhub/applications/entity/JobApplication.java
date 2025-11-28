@@ -4,14 +4,17 @@ import com.capitalhub.jobs.entity.JobOffer;
 import com.capitalhub.rep.entity.RepProfile;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "job_applications")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
-@Builder
 public class JobApplication {
 
     @Id
@@ -27,7 +30,6 @@ public class JobApplication {
     private JobOffer jobOffer;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ApplicationStatus status;
 
     @Column(columnDefinition = "TEXT")
@@ -38,35 +40,22 @@ public class JobApplication {
 
     private String interviewUrl;
 
-    // Fechas de auditoría
     private LocalDateTime interviewAt;
     private LocalDateTime hiredAt;
     private LocalDateTime rejectedAt;
 
-    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = createdAt;
-        if (status == null) status = ApplicationStatus.APPLIED;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
     
-    // Métodos helper de negocio
+    // Métodos helper de lógica
     public void markInterview(String url) {
         this.status = ApplicationStatus.INTERVIEW;
         this.interviewUrl = url;
         this.interviewAt = LocalDateTime.now();
     }
-    public void markOfferSent() { this.status = ApplicationStatus.OFFER_SENT; }
     public void markHired() { 
         this.status = ApplicationStatus.HIRED; 
         this.hiredAt = LocalDateTime.now();
@@ -76,5 +65,4 @@ public class JobApplication {
         this.companyNotes = notes;
         this.rejectedAt = LocalDateTime.now();
     }
-    public void markWithdrawn() { this.status = ApplicationStatus.WITHDRAWN; }
 }

@@ -9,19 +9,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "job_offers")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "job_offers")
 public class JobOffer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación con la empresa
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
@@ -32,25 +31,26 @@ public class JobOffer {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private RepRole role; // SETTER, CLOSER...
+    private RepRole role; // SETTER, CLOSER
 
-    private Integer seats;           // Plazas totales
-    private Integer maxApplicants;   // Límite de postulantes
+    private Integer seats;
+    private Integer maxApplicants;
     
     @Builder.Default
     private Integer applicantsCount = 0;
 
-    // Detalles de la oferta
-    private String language;
-    private String crm;
+    // Datos económicos y detalles
+    private Double salary;
     private Double commissionPercent;
     private Double avgTicket;
     private Double estimatedMonthlyEarnings;
 
-    private String modality; // Remoto, Híbrido...
-    private String market;   // España, Latam...
+    private String language;
+    private String crm;
+    private String modality;
+    private String market;
 
-    // Links importantes
+    // Links de entrevista
     private String calendlyUrl;
     private String zoomUrl;
     private String whatsappUrl;

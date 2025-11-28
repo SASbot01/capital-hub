@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Esto habilita el uso de @PreAuthorize en tus controladores
+@EnableMethodSecurity // Permite usar @PreAuthorize en los controllers
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -24,27 +24,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Deshabilitamos CSRF porque usamos JWT (stateless)
             .csrf(AbstractHttpConfigurer::disable)
-            
-            // Configuración de rutas
+            .cors(cors -> cors.configure(http)) // Usa la configuración de CorsConfig
             .authorizeHttpRequests(auth -> auth
-                // Rutas PÚBLICAS (Login, Registro, etc.)
+                // Rutas públicas
                 .requestMatchers("/api/auth/**").permitAll()
-                
-                // Si quieres que Swagger sea público (opcional)
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                
-                // Todas las demás requieren token
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                // El resto protegidas
                 .anyRequest().authenticated()
             )
-            
-            // Gestión de sesión: SIN ESTADO (Stateless)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            
-            // Agregamos tus proveedores y filtros
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

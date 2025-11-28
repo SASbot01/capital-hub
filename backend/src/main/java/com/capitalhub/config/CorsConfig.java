@@ -16,21 +16,17 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Permitir credenciales (cookies, headers de auth)
+        // Permitir que el navegador envíe cookies/headers de auth
         config.setAllowCredentials(true);
         
-        // ⚠️ IMPORTANTE: Aquí definimos quién puede conectarse.
-        // He añadido los puertos típicos de desarrollo local (Vite/React).
+        // ⚠️ IMPORTANTE: Puertos de tu Frontend
         config.setAllowedOrigins(List.of(
-            "http://localhost:3000", 
-            "http://localhost:5173",
-            "http://localhost:5174"
+            "http://localhost:5173", // Vite default
+            "http://localhost:3000",
+            "http://localhost:4173"
         ));
         
-        // Headers permitidos (necesario para enviar el Token "Authorization")
-        config.addAllowedHeader("*");
-        
-        // Métodos HTTP permitidos
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         
         source.registerCorsConfiguration("/**", config);

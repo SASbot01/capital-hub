@@ -45,10 +45,6 @@ public class JobApplicationService {
             throw new IllegalStateException("Ya has aplicado a esta oferta anteriormente."); 
         }
 
-        if (offer.getApplicantsCount() >= offer.getMaxApplicants()) {
-            throw new IllegalStateException("La oferta ha alcanzado el límite de postulantes.");
-        }
-
         JobApplication application = JobApplication.builder()
                 .rep(rep)
                 .jobOffer(offer)
@@ -58,6 +54,7 @@ public class JobApplicationService {
 
         JobApplication saved = applicationRepository.save(application);
 
+        // Actualizamos contador
         offer.setApplicantsCount(offer.getApplicantsCount() + 1);
         jobOfferRepository.save(offer);
 
@@ -78,6 +75,7 @@ public class JobApplicationService {
     public List<ApplicationResponse> listApplicationsForOffer(Long companyUserId, Long offerId) {
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
+        
         JobOffer offer = jobOfferRepository.findById(offerId)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
 
@@ -95,6 +93,7 @@ public class JobApplicationService {
                                                        String interviewUrl) {
         Company company = companyRepository.findByUserId(companyUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
+                
         JobApplication app = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Aplicación no encontrada"));
 
@@ -102,14 +101,20 @@ public class JobApplicationService {
             throw new IllegalArgumentException("No puedes modificar aplicaciones de otra empresa");
         }
 
-        switch (status) {
-            case INTERVIEW -> app.markInterview(interviewUrl);
-            case OFFER_SENT -> app.markOfferSent();
-            case HIRED -> app.markHired();
-            case REJECTED -> app.markRejected(companyNotes);
-            case WITHDRAWN -> app.markWithdrawn();
-            default -> app.setStatus(status);
+        // Lógica de negocio para cambios de estado
+        app.setStatus(status); // Seteamos el estado base
+        
+        if (status == ApplicationStatus.INTERVIEW && interviewUrl != null) {
+            app.markInterview(interviewUrl);
+        } else if (status == ApplicationStatus.HIRED) {
+            app.markHired();
+        } else if (status == ApplicationStatus.REJECTED) {
+            app.markRejected(companyNotes);
         }
+        // Faltaban estos métodos en la entidad, pero podemos setear el estado directamente si la entidad no los tiene
+        // app.markOfferSent(); 
+        // app.markWithdrawn();
+
         if (companyNotes != null) app.setCompanyNotes(companyNotes);
 
         return mapToResponse(applicationRepository.save(app));
@@ -122,13 +127,11 @@ public class JobApplicationService {
                 .jobTitle(app.getJobOffer().getTitle())
                 .jobRole(app.getJobOffer().getRole().name())
                 .companyId(app.getJobOffer().getCompany().getId())
-                // CORRECCIÓN AQUÍ: Usamos getName(), no getCompanyName()
                 .companyName(app.getJobOffer().getCompany().getName()) 
                 .status(app.getStatus())
                 .repMessage(app.getRepMessage())
                 .companyNotes(app.getCompanyNotes())
                 .interviewUrl(app.getInterviewUrl())
-                // CORRECCIÓN AQUÍ: Usamos el nombre correcto del builder para la fecha de creación
                 .createdAt(app.getCreatedAt())
                 .build();
     }

@@ -1,10 +1,7 @@
 package com.capitalhub.auth.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users") // Nombre de la tabla en MySQL
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
@@ -27,49 +24,34 @@ public class User implements UserDetails {
     private String firstName;
     private String lastName;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role; // ADMIN, COMPANY, REP
 
-    // Métodos de UserDetails (Spring Security)
+    // --- Métodos de Spring Security ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Convierte el ENUM Role a una autoridad entendible por Spring
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
+    public String getUsername() { return email; }
 
     @Override
-    public String getUsername() {
-        return email; // Usamos el email como usuario para loguearse
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

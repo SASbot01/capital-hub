@@ -4,6 +4,8 @@ import com.capitalhub.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,31 +18,36 @@ public class RepProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación Uno-a-Uno con el usuario (Closer/Setter)
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private RepRole roleType; // SETTER, CLOSER, etc.
+
+    @Column(columnDefinition = "TEXT")
     private String bio;
+    
     private String phone;
     private String city;
     private String country;
     
     private String linkedinUrl;
     private String portfolioUrl;
-    private String avatarUrl;
+    private String avatarUrl; 
+    private String introVideoUrl;
+    private String bestCallUrl;
 
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
 
-    /**
-     * Devuelve el nombre completo del REP.
-     * Esto arregla el error "cannot find symbol: method getFullName()"
-     * en ReviewService y otros DTOs.
-     */
+    private LocalDateTime createdAt;
+
+    // ✅ MÉTODO CLAVE QUE FALTABA
     public String getFullName() {
         if (user != null) {
             return user.getFirstName() + " " + user.getLastName();
         }
-        return "N/A";
+        return "Usuario Desconocido";
     }
 }
