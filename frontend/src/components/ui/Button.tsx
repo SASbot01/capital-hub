@@ -1,11 +1,11 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  // Añadimos 'isLoading' a la interfaz para que TypeScript no se queje
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
   isLoading?: boolean;
 }
 
+// Usamos 'export function' (exportación nombrada) para coincidir con el import { Button } en tus páginas
 export function Button({ 
   children, 
   variant = 'primary', 

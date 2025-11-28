@@ -28,7 +28,7 @@ public class CorsConfig {
         ));
         
         // Headers permitidos (necesario para enviar el Token "Authorization")
-        config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
+        config.addAllowedHeader("*");
         
         // Métodos HTTP permitidos
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

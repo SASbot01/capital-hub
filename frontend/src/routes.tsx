@@ -35,11 +35,12 @@ import CompanyJobApplicationsPage from "./pages/company/CompanyJobApplicationsPa
 export const router = createBrowserRouter([
     // 1. Rutas Públicas/Auth
     {
+        path: "/", // Add path for top-level Auth route
         element: <AuthLayout />,
         children: [
             // Ruta raíz que redirige al login
             {
-                path: "/",
+                index: true,
                 element: <Navigate to="/login" replace />,
             },
             {

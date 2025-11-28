@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import Topbar from "../../layouts/Topbar";
 import { useFetch } from '../../hooks/useFetch'; 
-import Button from "../../components/ui/Button"; 
+import { Button } from "../../components/ui/Button"; 
 import { applyToJob } from '../../api/applications'; 
 
 // ---------------------------------------------------
@@ -116,7 +116,6 @@ const JobOfferCard: React.FC<{ offer: JobOffer }> = ({ offer }) => {
                 <div className="flex gap-2">
                     <Button 
                         onClick={handleApply}
-                        isLoading={loading}
                         disabled={loading} // Quitamos 'applied' del disabled para permitir re-clicks si quieren ver el link
                         className={`px-3 py-1.5 text-xs rounded-full transition ${
                             applied 
@@ -124,7 +123,7 @@ const JobOfferCard: React.FC<{ offer: JobOffer }> = ({ offer }) => {
                             : "bg-black text-white hover:bg-neutral-900"
                         }`}
                     >
-                        {buttonText}
+                        {loading ? "Procesando..." : buttonText}
                     </Button>
                 </div>
             </div>

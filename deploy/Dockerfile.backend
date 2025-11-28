@@ -12,7 +12,10 @@ RUN mvn dependency:go-offline
 # 3. Copiamos el código fuente
 COPY src ./src
 
-# 4. Compilamos el proyecto creando el JAR (saltando tests para ir rápido)
+# 4. Verificamos que todas las dependencias y recursos estén disponibles
+RUN mvn verify -DskipTests
+
+# 5. Compilamos el proyecto creando el JAR (saltando tests para ir rápido)
 RUN mvn clean package -DskipTests
 
 # -------------------------------------------------------------------

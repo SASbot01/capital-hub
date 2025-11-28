@@ -1,6 +1,5 @@
 package com.capitalhub.applications.entity;
 
-import com.capitalhub.company.entity.Company;
 import com.capitalhub.jobs.entity.JobOffer;
 import com.capitalhub.rep.entity.RepProfile;
 import jakarta.persistence.*;

@@ -2,7 +2,6 @@ package com.capitalhub.dashboard.controller;
 
 import com.capitalhub.jobs.repository.JobOfferRepository;
 import com.capitalhub.applications.repository.JobApplicationRepository;
-import com.capitalhub.auth.entity.User;
 import com.capitalhub.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
